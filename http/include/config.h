@@ -5,10 +5,15 @@
  * @brief 
  * Config类，用来读取配置文件，使用单例模式实现
  * 在第一次调用 init 函数时会自动读取配置文件，也就是会自动调用 read() 函数
+
  */
 
 #include <map>
 #include <string>
+
+namespace http{
+    class Config;
+}
 
 class Config {
 private:
@@ -16,12 +21,14 @@ private:
     std::string m_conf_path;                        // 配置文件路径
 
 private:
-    Config();
-    ~Config();
+    Config() {}
+    ~Config() {}
+    void read();                            // 读取配置文件
+
 
 public:
     void init(const char *conf_path);       // 初始化 config 类
-    void read();                            // 读取配置文件
+    const std::map<std::string, std::string> &getConfig();  // 获取配置文件信息
 
 public:
     // 单例模式
@@ -30,6 +37,5 @@ public:
         return &conf;
     }
 };
-
 
 #endif // __CONFIG_H__
