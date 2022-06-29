@@ -22,7 +22,7 @@ public:
     virtual ~HttpException() { }
 
     // 返回异常错误提示
-    virtual const char *what() const noexcept {
+    virtual const char *what() const noexcept override{
         return m_exce.c_str();
     }
 
