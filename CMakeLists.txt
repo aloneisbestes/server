@@ -7,4 +7,6 @@ cmake_minimum_required(VERSION 3.0)
 project(server)
 
 # 调用 http 中的 cmake 文件
-add_subdirectory(http http)
+# message("object: " ${OBJECT_SOURCE_DIR})
+# 生成到当前目录下的 Bin 目录下
+add_subdirectory(http ${PROJECT_SOURCE_DIR}/bin)
