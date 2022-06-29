@@ -24,5 +24,13 @@ const char *strclr(char *src, char clr);
  */
 const char *strclrs(char *src, const char *clrs);
 
+/**
+ * @brief 
+ * 获取配置文件路径
+ * @param retpath=nullptr
+ * @return const char* 
+ */
+const char *getconfigpath(char *ret_path=nullptr);
+
 
 #endif // __COMMON_H__
