@@ -5,6 +5,10 @@
 自定义的异常类如下：
 ```c++
 // 用于自己程序的异常测试类，详情见 mexception.h
-class HttpException : public std::exception;
+class HttpException : public std::exception {
+    virtual const char *what() const noexcept;  // 返回异常错误提示
+
+    HttpException &operator=(const HttpException &exce) noexcept;   // 重载等号运算符
+}
 ```
 
