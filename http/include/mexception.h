@@ -29,6 +29,7 @@ public:
     // 等号运算符重载
     HttpException &operator=(const HttpException &exce) noexcept {
         m_exce = exce.m_exce;
+        return *this;
     }
 
 private:
