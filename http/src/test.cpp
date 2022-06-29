@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string.h>
 #include "common.h"
+#include "mexception.h"
 
 
 int main() {
@@ -10,6 +11,15 @@ int main() {
     strcpy(str_tmp, str); 
 
     strclrs(str_tmp, " \",{}");
+    std::cout << str_tmp << std::endl;
+
+    std::cout << strlen("/") << std::endl;
+
+    try {
+        const char *tmp = getconfigpath(str_tmp);
+    } catch (HttpException e) {
+        std::cout << e.what() << std::endl;
+    }
     std::cout << str_tmp << std::endl;
     return 0;
 }
