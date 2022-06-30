@@ -52,55 +52,35 @@ const char *getconfigpath(char *ret_path) {
     static char conf_path[FILE_PATH];
 
     char *tmp;
-    if (strlen(conf_path) == 0) {
-        tmp = getcwd(conf_path, FILE_PATH);
-        if (tmp == nullptr) {
-            throw HttpException("配置文件路径获取失败。");
-            return nullptr;
-        }
-        printf("now_path: %s\n", tmp);
+    tmp = getcwd(conf_path, FILE_PATH);
+    if (tmp == nullptr) {
+        throw HttpException("配置文件路径获取失败。");
+        return nullptr;
     }
 
-    DIR *dir;
-    dirent *dp;
-    struct stat stat_buf;
-    while (*conf_path != '\0') {    
-        // 打开目录
-        DIR *dir = opendir(conf_path);  // 打开目录
-        while ((dp = readdir(dir)) != nullptr) {
-            if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) 
-                continue;
-
-            // 是否为目录
-            stat(dp->d_name, &stat_buf);
-            if (S_ISDIR(stat_buf.st_mode)) {
-
-            }
-
-            // 遍历该目录
-            if (strcmp(dp->d_name, CONF_NAME) == 0) {
-                strncat(conf_path, dp->d_name, strlen(dp->d_name));
-                if (ret_path != nullptr) {
-                    strcpy(ret_path, conf_path);
-                    return conf_path;
-                }
-
-                if (getconfigpath(conf_path) != nullptr)
-                    return conf_path;
-            }
-
-        }
-        closedir(dir); // 关闭目录
-
-        // tmp 不为空，并且conf_path配置文件路径的长度不为一，也就是根路径
+    for (int i = 0; i < 2; i++) {
         tmp = strrchr(conf_path, '/');
-        if (tmp == nullptr) {
-            throw HttpException("配置文件路径获取失败。");
-            break;
+        if (tmp == nullptr) {   // 当前所在的路径是 bin 下面的 http
+        throw HttpException("配置文件路径获取失败。");
         }
         *tmp = '\0';
-        printf("now_path: %s\n", conf_path);
     }
+
+    printf("conf_path: %s\n", conf_path);
+
+    // 获取配置文件路径
+    DIR *dir;
+    dirent *dp;
+    dir = opendir(conf_path);
+    while ((dp = readdir(dir)) != nullptr) {
+        if (strcmp(dp->d_name, CONF_NAME) == 0) {
+            strcat(conf_path, "/");
+            strcat(conf_path, dp->d_name);
+            if (ret_path != nullptr) 
+                strcpy(ret_path, conf_path);
+        }
+    }
+    closedir(dir);
 
     return nullptr;
 }
