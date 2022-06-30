@@ -51,27 +51,44 @@ const char *getconfigpath(char *ret_path) {
     // 获取配置文件路径
     static char conf_path[FILE_PATH];
 
-    char *tmp = getcwd(conf_path, FILE_PATH);
-    if (tmp == nullptr) {
-        throw HttpException("配置文件路径获取失败。");
-        return nullptr;
+    char *tmp;
+    if (strlen(conf_path) == 0) {
+        tmp = getcwd(conf_path, FILE_PATH);
+        if (tmp == nullptr) {
+            throw HttpException("配置文件路径获取失败。");
+            return nullptr;
+        }
+        printf("now_path: %s\n", tmp);
     }
-    printf("now_path: %s\n", tmp);
 
     DIR *dir;
     dirent *dp;
+    struct stat stat_buf;
     while (*conf_path != '\0') {    
         // 打开目录
         DIR *dir = opendir(conf_path);  // 打开目录
         while ((dp = readdir(dir)) != nullptr) {
+            if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) 
+                continue;
+
+            // 是否为目录
+            stat(dp->d_name, &stat_buf);
+            if (S_ISDIR(stat_buf.st_mode)) {
+
+            }
+
             // 遍历该目录
             if (strcmp(dp->d_name, CONF_NAME) == 0) {
                 strncat(conf_path, dp->d_name, strlen(dp->d_name));
-                if (ret_path != nullptr) 
+                if (ret_path != nullptr) {
                     strcpy(ret_path, conf_path);
+                    return conf_path;
+                }
 
-                return conf_path;
+                if (getconfigpath(conf_path) != nullptr)
+                    return conf_path;
             }
+
         }
         closedir(dir); // 关闭目录
 
