@@ -12,3 +12,8 @@ class HttpException : public std::exception {
 }
 ```
 
+## 2. 配置文件
+配置文件头文件 config.h 主要作用是用来读取配置文件中的内容，程序刚运行时就会从配置文件路径中去读取 httpserver.conf 配置文件。
+
+主要的配置有 mysql 所在的服务器，mysql 的用户名和密码以及 mysql 端口号，使用的 databases；httpserver log 日志文件所在的路径；httpsever 服务器的端口号，默认端口是 10010
+
