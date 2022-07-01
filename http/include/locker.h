@@ -48,6 +48,11 @@ public:
     bool unlocker() {
         return pthread_mutex_unlock(&m_mutex) == 0 ? true : false;
     }
+
+    // 获取锁
+    pthread_mutex_t *getmutex() { 
+        return &m_mutex;
+    }
 };
 
 /**
