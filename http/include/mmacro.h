@@ -9,6 +9,7 @@ namespace http {
     }
 }
 
-#define CONF_NAME "conf"
+#define CONF_NAME           "conf"
+#define CONF_FILE_NAME      "httpserver.conf"
 
 #endif // __MMACRO_H__
