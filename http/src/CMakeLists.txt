@@ -17,3 +17,6 @@ include_directories(../include)
 
 # 生成可执行文件 httpserver
 add_executable(httpserver ${ALL_SRC} ${SRC})
+
+# 添加依赖库
+target_link_libraries(httpserver pthread) # 添加线程依赖库
