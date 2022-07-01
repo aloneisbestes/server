@@ -23,12 +23,11 @@ private:
 private:
     Config() {}
     ~Config() {}
-    void read();                            // 读取配置文件
-
+    bool read();                            // 读取配置文件
 
 public:
-    void init(const char *conf_path);       // 初始化 config 类
-    const std::map<std::string, std::string> &getConfig();  // 获取配置文件信息
+    bool init(const char *conf_path);       // 初始化 config 类
+    const std::map<std::string, std::string> &getConfig() { return m_conf; }  // 获取配置文件信息
 
 public:
     // 单例模式
