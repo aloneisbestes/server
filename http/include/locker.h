@@ -87,12 +87,12 @@ public:
 
     // 等待条件变量到达
     bool wait(pthread_mutex_t *mutex) {
-        pthread_cond_wait(&m_cond, mutex) == 0 ? true : false;
+        return pthread_cond_wait(&m_cond, mutex) == 0 ? true : false;
     }
 
     // 带有超时时间的等待条件变量到达
     bool timedwait(pthread_mutex_t *mutex, const timespec *t) {
-        pthread_cond_timedwait(&m_cond, mutex, t) == 0 ? true : false;
+        return pthread_cond_timedwait(&m_cond, mutex, t) == 0 ? true : false;
     }
 };
 
