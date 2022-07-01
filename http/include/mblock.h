@@ -121,13 +121,14 @@ public:
     bool push(const T &value) {
         m_mutex.locker();
 
-        if (isfull()) { // 判断阻塞队列是否为满
+        if (m_size == m_size_max) { // 判断阻塞队列是否为满
             m_mutex.unlocker();
             return false;
         }
 
-        m_back = (m_back + 1) % sizemax;
+        m_back = (m_back + 1) % m_size_max;
         m_block[m_back] = value;
+        ++m_size;
 
         // 发送条件成立
         m_cond.broadcast();
@@ -147,8 +148,9 @@ public:
         }
 
         // 出队
-        m_front = (m_front + 1) % sizemax;
+        m_front = (m_front + 1) % m_size_max;
         value = m_block[m_front];
+        --m_size;
 
         m_mutex.unlocker();
         return true;
