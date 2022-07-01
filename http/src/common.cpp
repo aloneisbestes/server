@@ -66,8 +66,6 @@ const char *getconfigpath(char *ret_path) {
         *tmp = '\0';
     }
 
-    printf("conf_path: %s\n", conf_path);
-
     // 获取配置文件路径
     DIR *dir;
     dirent *dp;
