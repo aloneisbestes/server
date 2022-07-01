@@ -1,5 +1,5 @@
 {
-    "log-path":"/home/alone/work/project/server/log",
+    "log-path":"/home/alone/work/project/server/http",
     "mysql-port":"3306",
     "mysql-ip":"yy.yyoneself.cn",
     "mysql-user":"root",
