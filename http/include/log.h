@@ -23,10 +23,12 @@ private:
     int m_count;        // log 文件当前行数
     int m_max_line;     // log 文件的最大行数
     int m_file_count;   // log 当前使用的文件个数
+    int m_now_day;      // 记录当前的天数
     
     char *m_buff;   // log buff
     std::string m_log_path;         // log 日志文件路径
     std::string m_log_name;         // log 日志文件名
+    std::string m_tmp_log_name;     // 临时的日志文件名
 
     std::ofstream m_fp;     // log 日志文件指针
 
@@ -44,6 +46,18 @@ private:
         delete [] m_tids;
         delete [] m_buff;
     }
+
+    // 处理log日志文件名
+    void createFilename();
+
+    // 创建新文件
+    bool createNewFile(const std::string &file, std::fstream &out_file);
+
+    // 统计当前的 log 日志文件是否到达最大行
+    void countFile(const std::string &file);
+
+    // 设置当前是那天
+    void setCurrentTime();
 
 public:
     // 单例模式
@@ -69,8 +83,7 @@ public:
               int block_size=BLOCK_QUEUE_SIZE, int thread_size=1);
 
     /* 写日志到文件 */
-    void write();
-
+    void write(int level, const char *format, ...);
 };
 
 #endif // __LOG_H__
