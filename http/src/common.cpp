@@ -82,3 +82,23 @@ const char *getconfigpath(char *ret_path) {
 
     return nullptr;
 }
+
+void createdir(const char *path) {
+    char tmp[FILENAME_MAX]={0};
+    strncpy(tmp, path, FILENAME_MAX);
+
+    // 查看文件是否能打开
+    DIR *dir = opendir(tmp);
+    if (dir != nullptr) {
+        closedir(dir);
+        return ;
+    }
+    
+    char *find_dir = strrchr(tmp, '/');
+    if (find_dir == nullptr)
+        return;
+    
+    *find_dir = '\0';
+    createdir(tmp);
+    mkdir(path, 0775);
+}

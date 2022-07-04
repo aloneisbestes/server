@@ -32,5 +32,12 @@ const char *strclrs(char *src, const char *clrs);
  */
 const char *getconfigpath(char *ret_path=nullptr);
 
+/**
+ * @brief 
+ * 用于递归创建目录
+ * @param dir 
+ */
+void createdir(const char *dir);
+
 
 #endif // __COMMON_H__
