@@ -22,4 +22,10 @@ namespace http {
 /* 定义文件的最大行数 */
 #define FILE_MAX_COUNT      1000000
 
+/* 定义写入日志类型 */
+#define DEBUG_TYPE          0
+#define INFO_TYPE           1
+#define WARN_TYPE           2
+#define ERROR_TYPE          3
+
 #endif // __MMACRO_H__
