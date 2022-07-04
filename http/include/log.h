@@ -7,15 +7,43 @@
  * Log 日志文件采用单例模式
  */
 
-namespace http {
-    class Log;
-}
+#include <string>
+#include <fstream>
+#include "locker.h"
+#include "mmacro.h"
+#include "mblock.h"
+
 
 class Log {
 private:
+    bool m_isasync;     // 是否开启异步线程
+    bool m_isclose;     // 是否开启log日志
+
+    int m_buff_size;    // log buff 的长度
+    int m_count;        // log 文件当前行数
+    int m_max_line;     // log 文件的最大行数
+    int m_file_count;   // log 当前使用的文件个数
+    
+    char *m_buff;   // log buff
+    std::string m_log_path;         // log 日志文件路径
+    std::string m_log_name;         // log 日志文件名
+
+    std::ofstream m_fp;     // log 日志文件指针
+
+    pthread_t *m_tids;        // 线程 id 数组
+    int m_tids_size;          // 线程数组的大小
+
+    BlockQueue<std::string> *m_block;    // 阻塞队列
+    Locker m_mutex;     // 互斥锁
+    Cond m_cond;        // 条件变量
+
+private:
     // 单例模式隐藏构造和析构
     Log() {}
-    virtual ~Log() {}
+    virtual ~Log() {
+        delete [] m_tids;
+        delete [] m_buff;
+    }
 
 public:
     // 单例模式
@@ -30,6 +58,18 @@ public:
         
         return nullptr;
     }
+
+public:
+    /**
+     * filename: 文件名或文件路径                       isclose: 是否开启日志 
+     * max_line: 文件的最大长度                         buff_size: 日志缓冲区的大小
+     * block_size: 阻塞队列的长度                       thread_size: 线程个数
+     */
+    bool init(const char *filename, bool isclose, int max_line=FILE_MAX_COUNT, int buff_size=BUFFER_MAX_SIZE, \
+              int block_size=BLOCK_QUEUE_SIZE, int thread_size=1);
+
+    /* 写日志到文件 */
+    void write();
 
 };
 

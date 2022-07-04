@@ -12,12 +12,6 @@
  * email: 910319432@qq.com
  */
 
-namespace http {
-    class Locker;
-    class Cond;
-    class Sem;
-}
-
 /**
  * @brief 
  * 互斥锁的封装

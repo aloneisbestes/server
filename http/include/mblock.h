@@ -12,10 +12,6 @@
 #include "mmacro.h"
 #include "locker.h"
 
-namespace http {
-    class BlockQueue;
-}
-
 template<class T> 
 class BlockQueue{
 private:

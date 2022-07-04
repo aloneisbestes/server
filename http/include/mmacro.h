@@ -16,4 +16,10 @@ namespace http {
 /* 定义阻塞队列的默认大小 */
 #define BLOCK_QUEUE_SIZE    1000
 
+/* 定义 buffer 的最大长度 */
+#define BUFFER_MAX_SIZE     4096
+
+/* 定义文件的最大行数 */
+#define FILE_MAX_COUNT      1000000
+
 #endif // __MMACRO_H__

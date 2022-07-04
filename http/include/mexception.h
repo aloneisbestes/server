@@ -4,10 +4,6 @@
 #include <exception>
 #include <string>
 
-namespace http {
-    class HttpException;
-}
-
 class HttpException : public std::exception {
 public:
     // 构造

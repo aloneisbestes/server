@@ -11,10 +11,6 @@
 #include <map>
 #include <string>
 
-namespace http{
-    class Config;
-}
-
 class Config {
 private:
     std::map<std::string, std::string> m_conf;      // 读取的配置文件内容以键值对的形式存储到 map 中
