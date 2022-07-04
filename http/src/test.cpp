@@ -8,11 +8,13 @@
 #include "mdebug.h"
 #include "config.h"
 #include "mblock.h"
+#include "log.h"
 
 void test_strclr();
 void test_getconfigpath();
 void test_configclass();
 void test_block_queue();
+void test_log_file();
 
 using namespace std;
 
@@ -30,7 +32,10 @@ int main() {
     test_configclass();
 
     // 测试block阻塞队列
-    test_block_queue();
+    // test_block_queue();
+
+    // 测试log日志文件
+    test_log_file();
 
     return 0;
 }
@@ -96,4 +101,9 @@ void test_block_queue() {
         }
         i++;
     }
+}
+
+// 测试log日志文件
+void test_log_file() {
+    Log::get()->init("logfile.log", false);
 }
