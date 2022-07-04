@@ -9,7 +9,8 @@ else()
     set(SRC main.cpp)
 endif()
 
-
+# 添加Debug宏
+add_definitions(-DMDEBUG)
 
 # 导入当前依赖的头文件件所在位置
 include_directories(../include)
