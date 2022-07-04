@@ -15,6 +15,7 @@ void test_getconfigpath();
 void test_configclass();
 void test_block_queue();
 void test_log_file();
+void test_recursion_create_dir();
 
 using namespace std;
 
@@ -33,6 +34,9 @@ int main() {
 
     // 测试block阻塞队列
     // test_block_queue();
+
+    // 测试递归创建目录
+    // test_recursion_create_dir();
 
     // 测试log日志文件
     test_log_file();
@@ -103,7 +107,14 @@ void test_block_queue() {
     }
 }
 
+// 测试 递归创建目录
+void test_recursion_create_dir() {
+    const char *path = "/home/alone/work/project/server/log/http";
+    createdir(path);
+}
+
 // 测试log日志文件
 void test_log_file() {
-    Log::get()->init("logfile.log", false);
+    Log::get()->init("/home/alone/work/project/server/log/test", false, 4);
+    Log::get()->write(1, "fdsjkaf");
 }
