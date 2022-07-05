@@ -28,4 +28,8 @@ namespace http {
 #define WARN_TYPE           2
 #define ERROR_TYPE          3
 
+/* 定义套接字协议版本 */
+#define INET_4              4
+#define INET_6              5
+
 #endif // __MMACRO_H__
