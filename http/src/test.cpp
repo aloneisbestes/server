@@ -9,6 +9,7 @@
 #include "config.h"
 #include "mblock.h"
 #include "log.h"
+#include "http.h"
 
 void test_strclr();
 void test_getconfigpath();
@@ -16,6 +17,7 @@ void test_configclass();
 void test_block_queue();
 void test_log_file();
 void test_recursion_create_dir();
+void test_http_server();
 
 using namespace std;
 
@@ -39,7 +41,10 @@ int main() {
     // test_recursion_create_dir();
 
     // 测试log日志文件
-    test_log_file();
+    // test_log_file();
+
+    // 测试http.h
+    test_http_server();
 
     return 0;
 }
@@ -115,6 +120,7 @@ void test_recursion_create_dir() {
 
 // 测试log日志文件
 void test_log_file() {
+    int m_isclose;
     Log::get()->init("/home/alone/work/project/server/log/test", false, 100, BUFFER_MAX_SIZE);
 
     sleep(1);
@@ -123,5 +129,14 @@ void test_log_file() {
         usleep(100);
     }
 
+    LogInfo("write: %d", 1);
+
     while (1);
+}
+
+// 测试 http.h
+void test_http_server() {
+    HttpSocket *http = new HttpSocket();
+    
+    http->writeData();
 }
