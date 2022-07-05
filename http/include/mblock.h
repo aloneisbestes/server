@@ -28,6 +28,7 @@ private:
 public:
     BlockQueue(int size=BLOCK_QUEUE_SIZE) {
         m_back = -1;
+        m_front = -1;
         m_size = 0;
         m_size_max = size;
         m_block = new T[m_size_max];
@@ -116,8 +117,8 @@ public:
     // 出队
     bool push(const T &value) {
         m_mutex.locker();
-
         if (m_size == m_size_max) { // 判断阻塞队列是否为满
+            m_cond.broadcast();
             m_mutex.unlocker();
             return false;
         }
@@ -135,7 +136,6 @@ public:
     // 出队
     bool pop(T &value) {
         m_mutex.locker();
-
         while (m_size <= 0) {
             if(!m_cond.wait(m_mutex.getmutex())) {
                 m_mutex.unlocker();
