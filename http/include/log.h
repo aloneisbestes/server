@@ -32,8 +32,8 @@ private:
 
     std::ofstream m_fp;     // log 日志文件指针
 
-    pthread_t *m_tids;        // 线程 id 数组
-    int m_tids_size;          // 线程数组的大小
+    pthread_t m_tids;        // 线程 id 
+    // int m_tids_size;          // 线程数组的大小
 
     BlockQueue<std::string> *m_block;    // 阻塞队列
     Locker m_mutex;     // 互斥锁
@@ -43,7 +43,6 @@ private:
     // 单例模式隐藏构造和析构
     Log() {}
     virtual ~Log() {
-        delete [] m_tids;
         delete [] m_buff;
     }
 
@@ -59,6 +58,9 @@ private:
     // 设置当前是那天
     void setCurrentTime();
 
+    // 内部私有的线程处理函数
+    void *asyncWriteLog();
+
 public:
     // 单例模式
     static Log *get() {
@@ -69,8 +71,8 @@ public:
     // 线程处理函数
     static void *logThread(void *arg) {
         // 调用内部私有线程处理函数
-        
-        return nullptr;
+        Log::get()->asyncWriteLog();
+        return (void *)nullptr;
     }
 
 public:
@@ -80,7 +82,7 @@ public:
      * block_size: 阻塞队列的长度                       thread_size: 线程个数
      */
     bool init(const char *filename, bool isclose, int max_line=FILE_MAX_COUNT, int buff_size=BUFFER_MAX_SIZE, \
-              int block_size=BLOCK_QUEUE_SIZE, int thread_size=1);
+              int block_size=BLOCK_QUEUE_SIZE);
 
     /* 写日志到文件 */
     void write(int level, const char *format, ...);

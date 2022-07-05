@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#include <stdarg.h>
 #include "log.h"
 #include "config.h"
 #include "mdebug.h"
@@ -10,27 +11,20 @@
 
 using std::string;
 
-bool Log::init(const char *filename, bool isclose, int max_line, int buff_size, int block_size, int thread_size) {
+bool Log::init(const char *filename, bool isclose, int max_line, int buff_size, int block_size) {
     // 判断是否开启异步日志, block_size>0表示开启异步日志
     if (block_size > 0) {
+        DebugPrint("create thread\n");
         m_block = new BlockQueue<string>(block_size);
         if (m_block == nullptr) {   // 阻塞队列开启失败
             throw HttpException("block init failed.");
             m_isasync = false;  // 初始化阻塞队列失败，使用同步线程
         } else {
             // 开启成功，创建线程处理函数
-            int count=0;
-            m_tids = new pthread_t[thread_size];
-            for (int i = 0; i < thread_size; i++) {
-                // 创建线程
-                pthread_t tmp_tid;
-                if (pthread_create(&tmp_tid, nullptr, logThread, nullptr) == 0) {
-                    m_tids[count++] = tmp_tid;
-                    // 让子线程与主线程分离
-                    pthread_detach(tmp_tid);
-                }
+            if (pthread_create(&m_tids, nullptr, logThread, nullptr) == 0) {
+                // 让子线程与主线程分离
+                pthread_detach(m_tids);
             }
-            m_tids_size = count;    // 正在开启线程的个数
             m_isasync = true;   // 开启异步线程
         }
     }
@@ -88,6 +82,7 @@ bool Log::init(const char *filename, bool isclose, int max_line, int buff_size, 
 
     // 打开 log 日志文件，需要判断当前日志文件是否达到最大行
     countFile(real_path);
+    DebugPrint("m_file_count: %d\n", m_file_count);
 
     // 设置当前是哪一天
     setCurrentTime();
@@ -112,14 +107,16 @@ void Log::createFilename() {
 
     m_tmp_log_name += "_";
     m_tmp_log_name += tmp_strtime;
-    DebugPrint("m_tmp_log_name: %s\n", m_tmp_log_name.c_str());
+    // DebugPrint("m_tmp_log_name: %s\n", m_tmp_log_name.c_str());
 }
 
 void Log::countFile(const std::string &file) {
     // 统计当前使用的是哪个文件
     std::fstream out_file;
 
+    DebugPrint("file: %s\n", file.c_str());
     if (createNewFile(file, out_file) == true) {
+        DebugPrint("create new file is success.\n");
         return ;
     }
 
@@ -136,6 +133,7 @@ void Log::countFile(const std::string &file) {
         m_file_count++;
         createFilename();
         std::string real_paht = m_log_path + "/" + m_tmp_log_name;
+        DebugPrint("log file: %s\n", real_paht.c_str());
         countFile(real_paht);
         out_file.close();
     } else {
@@ -179,8 +177,6 @@ void Log::write(int level, const char *format, ...) {
 
     m_mutex.locker();
 
-    m_count = 100;
-
     // 判断是否是当前日志或者文件达到最大行数
     if (m_now_day != real_time.tm_mday || m_count >= m_max_line) {
         // 如果条件成立，则需要重新创建文件
@@ -199,9 +195,46 @@ void Log::write(int level, const char *format, ...) {
         }
     }
 
+    // 行数计数+1
+    ++m_count;
     m_mutex.unlocker();
-}
 
+
+    /* 格式化写入日志格式 */
+    m_mutex.locker();
+
+    va_list vlst;
+    va_start(vlst, format);
+    std::string write_str;
+
+    // 格式化时间
+    int m= sprintf(m_buff, "%d-%02d-%02d %02d:%02d:%02d %s", real_time.tm_year+1900, real_time.tm_mon, real_time.tm_mday, \
+                                                             real_time.tm_hour, real_time.tm_min, real_time.tm_sec, prompt.c_str());
+
+    int n = vsnprintf(m_buff+m, m_buff_size-m, format, vlst);
+    m_buff[m+n] = '\n';
+    m_buff[m+n+1] = '\0';
+    DebugPrint("log: %s", m_buff);
+
+    va_end(vlst);
+
+    write_str = m_buff;
+    m_mutex.unlocker();
+
+    // 写入日志
+    if (!m_isclose) {   // 总日志开关
+        if (m_isasync && !m_block->isfull()) {
+            // 异步日志
+            m_block->push(write_str);
+        } else {
+            m_mutex.locker();
+            // 同步日志
+            m_fp.write(write_str.c_str(), write_str.size());
+            m_fp.flush();
+            m_mutex.unlocker();
+        }
+    }
+}
 
 void Log::setCurrentTime() {
     // 设置当前时间
@@ -227,13 +260,35 @@ bool Log::createNewFile(const std::string &file, std::fstream &out_file) {
         sprintf(tmp_time, "create file time: %d-%02d-%02d %02d:%02d:%02d\n", real_time.tm_year+1900, real_time.tm_mon, \
                                                                              real_time.tm_mday, real_time.tm_hour, \
                                                                              real_time.tm_min, real_time.tm_sec);
-        DebugPrint("tmp_time: %s\n", tmp_time);
+        // DebugPrint("tmp_time: %s\n", tmp_time);
         tmp_file << tmp_time;
         tmp_file.close();
+
+        if (m_fp.is_open())
+            m_fp.close();
+
         m_fp.open(file, std::ofstream::app);
         m_count=0;
         return true;
     }
 
     return false;
+}
+
+// 内部私有的线程处理函数
+void *Log::asyncWriteLog() {
+
+    std::string write_str;
+
+    int count = 0;
+
+    while (m_block->pop(write_str)) {
+        // 写入日志
+        m_mutex.locker();
+        m_fp.write(write_str.c_str(), write_str.size());
+        m_fp.flush();
+        m_mutex.unlocker();
+    }
+    
+    return (void*)nullptr;
 }
