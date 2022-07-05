@@ -15,6 +15,11 @@ add_definitions(-DMDEBUG)
 # 导入当前依赖的头文件件所在位置
 include_directories(../include)
 
+# 添加 GDB 调试
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_C_FLAGS_DEBUG "$ENV{CFLAGS} -O0 -Wall -g -ggdb")
+SET(CMAKE_C_FLAGS_RELEASE "$ENV{CFLAGS} -O3 -Wall")
+
 # 生成可执行文件 httpserver
 add_executable(httpserver ${ALL_SRC} ${SRC})
 
