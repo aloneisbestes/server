@@ -88,4 +88,29 @@ public:
     void write(int level, const char *format, ...);
 };
 
+// log 宏
+#define LogInfo(format, arg...) { \
+    if (!m_isclose) { \
+        Log::get()->write(INFO_TYPE, format, ##arg);\
+    }\
+}
+
+#define LogDebug(format, arg...) { \
+    if (!m_isclose) { \
+        Log::get()->write(DEBUG_TYPE, format, ##arg);\
+    }\
+}
+
+#define LogError(format, arg...) { \
+    if (!m_isclose) { \
+        Log::get()->write(ERROR_TYPE, format, ##arg);\
+    }\
+}
+
+#define LogWarn(format, arg...) { \
+    if (!m_isclose) { \
+        Log::get()->write(WARN_TYPE, format, ##arg);\
+    }\
+}
+
 #endif // __LOG_H__
