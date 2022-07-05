@@ -115,6 +115,13 @@ void test_recursion_create_dir() {
 
 // 测试log日志文件
 void test_log_file() {
-    Log::get()->init("/home/alone/work/project/server/log/test", false, 4);
-    Log::get()->write(1, "fdsjkaf");
+    Log::get()->init("/home/alone/work/project/server/log/test", false, 100, BUFFER_MAX_SIZE);
+
+    sleep(1);
+    for (int i = 0; i < 1000; i++) {
+        Log::get()->write(DEBUG_TYPE, "write: %d", i+1);
+        usleep(100);
+    }
+
+    while (1);
 }
