@@ -1,5 +1,5 @@
 # 设置所有源文件
-set(ALL_SRC common.cpp config.cpp log.cpp)
+set(ALL_SRC common.cpp config.cpp log.cpp http.cpp)
 
 option(TEST "use test.cpp?" OFF)
 
