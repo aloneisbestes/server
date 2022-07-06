@@ -32,4 +32,15 @@ namespace http {
 #define INET_4              4
 #define INET_6              5
 
+/* 定义监听的最大套接字 */
+#define LISTEN_MAX          5
+
+/* 内核注册表 epoll */
+#define EPOLL_MAX           5
+#define EPOLL_EVEMT_MAX     10000    // 最大事件为 10000
+
+/* 定义读写缓冲区大小 */
+#define READ_BUFFER_MAX     4096
+#define WRITE_BUFFER_MAX    1024
+
 #endif // __MMACRO_H__
