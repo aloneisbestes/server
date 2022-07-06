@@ -133,10 +133,3 @@ void test_log_file() {
 
     while (1);
 }
-
-// 测试 http.h
-void test_http_server() {
-    HttpSocket *http = new HttpSocket();
-    
-    http->writeData();
-}
