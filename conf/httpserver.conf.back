@@ -1,7 +1,8 @@
 {
-    "log-path":"/home/alone/work/project/server/http",
+    "log-path":"/home/alone/work/project/server/log",
     "mysql-port":"3306",
     "mysql-ip":"yy.yyoneself.cn",
     "mysql-user":"root",
-    "http-port":"8080"
+    "http-port":"8080",
+    "http-root":"/home/alone/work/project/server/www"
 }
