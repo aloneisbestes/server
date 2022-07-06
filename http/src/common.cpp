@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 #include "mexception.h"
+#include "log.h"
 #include "common.h"
 #include "mmacro.h"
 
@@ -101,4 +102,24 @@ void createdir(const char *path) {
     *find_dir = '\0';
     createdir(tmp);
     mkdir(path, 0775);
+}
+
+int setnonblocking(int sock) {
+    // 设置非阻塞
+    int m_isclose = false;
+
+    int old_opts;
+    old_opts = fcntl(sock, F_GETFL);
+    if (old_opts < 0) {
+        LogInfo("setnonblocking: %s", strerror(errno));
+        return -1;
+    }
+
+    int new_opts = old_opts | O_NONBLOCK;
+    if (new_opts < 0) {
+        LogInfo("sernonblocking: %s", strerror(errno));
+        return -1;
+    }
+
+    return old_opts;
 }
