@@ -5,6 +5,7 @@
 #include "http.h"
 #include "common.h"
 #include "mdebug.h"
+#include "webserver.h"
 
 /**
  * @brief 
@@ -43,9 +44,19 @@ int main(int argc, char **argv) {
 
     Log::get()->write(INFO_TYPE, "init complete.");
 
-    // 开启服务器
-    HttpSocket *httpserver = new HttpSocket();
-    httpserver->start();
+    // 创建服务器
+    WebServer web_server;
+    
+    // 初始化服务器
+    web_server.init_server(8080, false);
+
+    // 初始化套接字以及epoll
+    web_server.init_socket();
+
+    // 开启服务器，循环监听
+    web_server.epoll_loop();
+
+    
 
     return 0;
 }
