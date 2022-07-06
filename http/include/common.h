@@ -39,5 +39,12 @@ const char *getconfigpath(char *ret_path=nullptr);
  */
 void createdir(const char *dir);
 
+/**
+ * @brief 
+ * 设置非阻塞, 返回旧的文件描述符标志, 如果失败返回-1
+ * @param sock 
+ * @return int 
+ */
+int setnonblocking(int sock);
 
 #endif // __COMMON_H__
