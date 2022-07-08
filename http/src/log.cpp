@@ -214,7 +214,7 @@ void Log::write(int level, const char *format, ...) {
     int n = vsnprintf(m_buff+m, m_buff_size-m, format, vlst);
     m_buff[m+n] = '\n';
     m_buff[m+n+1] = '\0';
-    DebugPrint("log: %s", m_buff);
+    // DebugPrint("log: %s", m_buff);
 
     va_end(vlst);
 
