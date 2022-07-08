@@ -14,6 +14,8 @@
 
 #include <string>
 #include <netinet/in.h>
+#include <sys/epoll.h>
+#include <fstream>
 
 #include "mmacro.h"
 
@@ -21,7 +23,7 @@ class HttpConn {
 private:
     // 重命名
     typedef struct sockaddr_in SockAddrIn;
-
+    
     // 定义请求的方法
     enum Method {
         GET=1,          // 请求指定的页面信息，并返回实体主体。
@@ -32,12 +34,12 @@ private:
 
     // 报文解析的结果
     enum HttpCode {
-        GET_REQUEST,        // 表示获得了一个完整的客户端请求
-        BAD_REQUEST,        // 坏的请求表示客户端请求语法有问题
+        GET_REQUEST,        // 表示获得了一个完整的客户端请求       
+        BAD_REQUEST,        // 坏的请求表示客户端请求语法有问题             404
         NO_REQUEST,         // 表示请求不完整，需要继续读取客户端数据
-        FORBIDDEN_REQUEST,  // 拒绝服务表示客户对资源没有足够的访问权限
-        FILE_REQUEST,       // 请求文件
-        INTERNAL_ERROR,     // 表示服务器内部错误
+        FORBIDDEN_REQUEST,  // 拒绝服务表示客户对资源没有足够的访问权限      403
+        FILE_REQUEST,       // 请求文件                                   200
+        INTERNAL_ERROR,     // 表示服务器内部错误                          500
         CLOSE_CONNECTION    // 表示客户端已经关闭连接了
     };
 
@@ -68,11 +70,17 @@ private:
     char m_write_buf[WRITE_BUFFER_MAX];     // write buff
     int m_read_idx;     // 当前读指针位置
     int m_write_idx;    // 当前写指针位置
+    int m_check_idx;    // 解析行的当前位置
+    int m_start_idx;    // 解析的开始位置 
+
+    int m_epollfd;      // epoll 描述符
 
     SockAddrIn m_addrs;
     int m_sockfd;   // 客户端套接字
 
     int m_burst_mode;   // 触发模式，ET | IN or IN
+    int m_check_state;  // 主状态机当前状态
+    int m_connect_type;     // 连接类型，为1表示keep-alive，否则为 close
 
     Method m_method;                // 请求方式
     std::string m_url;              // 请求路径
@@ -86,6 +94,9 @@ private:
     std::string m_accept_language;  // 浏览器申明自己接收的语言
     std::string m_content;          // 请求体内容
     int m_contetn_len;              // 请求体长度
+    std::string m_resp_content;     // 返回的内容
+
+    std::fstream m_out_file;        // 读写文件
 
     std::string m_root;             // http服务器资源根路径
 
@@ -94,23 +105,25 @@ public:
      *  mode: 模式设置
      */
     void init(int sockfd, int isclose, const SockAddrIn &addr, const std::string &web_root, \
-              int mode);
+              int mode, int epollfd);
 
     void process();     // 读写总进程
 
-    void close();   // 关闭连接
+    void closefd(bool real_bool=true);   // 关闭连接
 
-    void readData();    // 读取内容
+    bool readData();    // 读取内容
 
-    void writeData();   // 写数据
+    void writeData(HttpCode code);   // 写数据
 
 private:
+// public:
     /* 私有方法 */
     void init();        // 初始化
 
-    HttpCode processRead();     // 读
+    /* 解析函数 */
+    HttpCode processRead();     // 循环解析
 
-    void processWrite(HttpCode code);    // 写
+    bool processWrite(HttpCode code);    // 写
 
     HttpCode parseRequestLine(char *request);   // 解析请求行
 
@@ -119,6 +132,25 @@ private:
     HttpCode parseRequestContent(char *request);    // 解析请求体
 
     LineStatus parseLine();     // 解析一行
+
+    /* 添加响应数据 */
+    bool addResponse(const char *format, ...);      // 添加响应行
+
+    bool addContent(const char *content);       // 添加内容，对于 post put 和 delete
+
+    bool addStatusLine(int status, const char *title);  // 添加状态
+
+    bool addHeaders(int content_len);       // 添加响应头
+
+    bool addContentType();          // 添加响应体的类型
+
+    bool addContentLength(int content_len);    // 添加相应长度
+
+    bool addConnectionType();           // 添加连接类型
+
+    bool addBlockLine();        // 添加 \r\n
+
+    HttpCode processData();         // 处理数据
 };
 
 #endif // __HTTP_H__
