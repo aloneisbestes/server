@@ -18,6 +18,7 @@ void test_block_queue();
 void test_log_file();
 void test_recursion_create_dir();
 void test_http_server();
+void test_http_parse();
 
 using namespace std;
 
@@ -43,8 +44,11 @@ int main() {
     // 测试log日志文件
     // test_log_file();
 
-    // 测试http.h
-    test_http_server();
+    // 测试webserver.h
+    // test_http_server();
+
+    // 测试http.h，解析测试
+    test_http_parse();
 
     return 0;
 }
@@ -132,4 +136,29 @@ void test_log_file() {
     LogInfo("write: %d", 1);
 
     while (1);
+}
+
+// 测试http解析
+void test_http_parse() {
+    HttpConn http_parse;
+    struct sockaddr_in t;
+    http_parse.init(1, false, t, "http", 1);
+
+    // http_parse.setReadBuf("GET / HTTP/1.1\r\n");
+    // http_parse.parseLine();
+    
+    char request[1000]={0};
+    // strcpy(request, "GET https://aloneisbestes.cn/ HTTP/1.1");
+    // http_parse.parseRequestLine(request);
+    strcpy(request, "Host: aloneisbestes.cn:8080\
+                     Connection: keep-alive\
+                     User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36\
+                     Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8 \
+                     Referer: http://aloneisbestes.cn:8080/ \
+                     Accept-Encoding: gzip, deflate\
+                     Accept-Language: zh-CN,zh;q=0.9");
+    http_parse.setReadBuf(request);
+
+    // http_parse.processRead();
+
 }

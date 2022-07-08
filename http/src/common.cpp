@@ -116,6 +116,7 @@ int setnonblocking(int sock) {
     }
 
     int new_opts = old_opts | O_NONBLOCK;
+    new_opts = fcntl(sock, F_SETFL, new_opts);  // 设置非阻塞
     if (new_opts < 0) {
         LogInfo("sernonblocking: %s", strerror(errno));
         return -1;
