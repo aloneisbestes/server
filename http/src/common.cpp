@@ -121,6 +121,5 @@ int setnonblocking(int sock) {
         LogInfo("sernonblocking: %s", strerror(errno));
         return -1;
     }
-
     return old_opts;
 }
