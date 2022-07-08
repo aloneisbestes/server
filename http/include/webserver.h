@@ -50,6 +50,9 @@ public:
 
     // 测试
     void test(int fd);
+
+    // 测试1
+    void test1(int fd);
 };
 
 #endif // __WEB_SERVER_H__

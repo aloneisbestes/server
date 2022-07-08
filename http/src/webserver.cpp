@@ -9,6 +9,7 @@
 #include "log.h"
 #include "common.h"
 #include "mdebug.h"
+#include "http.h"
 
 WebServer::WebServer() {
     // 初始化服务器资源位置,从配置文件中读取
@@ -128,10 +129,15 @@ void WebServer::epoll_loop() {
             } else if (m_events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) {
                 // 客户端发送关闭连接，服务端移除内核事件
                 epoll_ctl(m_epollfd, EPOLL_CTL_DEL, m_events[i].data.fd, nullptr);
+                close(m_events[i].data.fd);
             } else if (m_events[i].events & EPOLLIN) {
                 // 处理连接
                 int fd = m_events[i].data.fd;     
-                test(fd);
+                // test(fd);
+                // test1(fd);
+                HttpConn http;
+                http.init(fd, false, m_client_addr, m_root, 1, m_epollfd);
+                http.process();
             }
         }
     }
@@ -162,4 +168,31 @@ void WebServer::test(int fd) {
 
     write(fd, send_str.c_str(), send_str.size());
     close(fd);
+}
+
+// 测试1
+void WebServer::test1(int fd) {
+    HttpConn http;
+    http.init(fd, false, m_client_addr, m_root, 1, m_epollfd);
+    if (http.readData() == false) {
+        return ;
+    }
+    http.process();
+
+    char write_buff[BUFFER_MAX_SIZE]={0};
+    std::string file = m_root;
+    file += "/index.html";
+    std::fstream out_file;
+    out_file.open(file, std::fstream::in);
+    std::string send_str = "HTTP/1.1 200 OK\r\nContent-Type:text/html;utf-8\r\n\r\n";
+
+    while (!out_file.eof()) {
+        out_file.getline(write_buff, BUFFER_MAX_SIZE);
+        send_str += write_buff;
+    }
+
+    write(fd, send_str.c_str(), send_str.size());
+    close(fd);
+    epoll_ctl(m_epollfd, EPOLL_CTL_DEL, fd, nullptr);
+    DebugPrint("epoll_ctl: delete\n");
 }
