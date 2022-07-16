@@ -55,7 +55,6 @@ void HttpConn::init() {
     m_check_idx = 0;                // 从状态机当前的解析位置
     m_start_idx = 0;
     m_contetn_len = 0;
-    m_isimage = false;
 
     memset(m_read_buf, 0, READ_BUFFER_MAX);
     memset(m_write_buf, 0, WRITE_BUFFER_MAX);
@@ -196,10 +195,16 @@ HttpConn::LineStatus HttpConn::parseLine() {
 HttpConn::HttpCode HttpConn::processData() {
     std::string source_path;
     if (m_method == Method::GET) {
-        if (!getRequest())  {
+        source_path = m_root + m_url;
+        DebugPrint("source_path: %s\n", source_path.c_str());
+        if (strncasecmp(m_url.c_str(), "/images", 7) == 0) {
+            m_out_file.open(source_path, std::fstream::in | std::fstream::binary);
+        } else {
+            m_out_file.open(source_path, std::fstream::in);
+        }
+        if (!m_out_file.is_open()) {
             return HttpCode::BAD_REQUEST;
         }
-
     }
 
     return HttpCode::FILE_REQUEST;
@@ -515,8 +520,9 @@ void HttpConn::writeData(HttpConn::HttpCode code) {
         addHeaders(len);
     } else {
         while (!m_out_file.eof()) {
-            m_out_file.read(tmpbuf, 1024);
+            m_out_file.getline(tmpbuf, 1024);
             m_resp_content += tmpbuf;
+            // DebugPrint("234\n");
         }
         DebugPrint("m_resp_count: %s\n", m_resp_content.c_str());
         addHeaders(m_resp_content.size());
@@ -531,51 +537,8 @@ void HttpConn::writeData(HttpConn::HttpCode code) {
         n = send(m_sockfd, imgbuf, imglen, 0);
         delete [] imgbuf;
     } else {
-        // 数据过大，需要循环发送
-        const char *tmp_send = m_resp_content.c_str();
-        n = 0;
-        int count_size = 0;
-        do {
-            n = send(m_sockfd, tmp_send+count_size, 1024, 0);
-            count_size += n;
-        }while (n > 0 && count_size != m_resp_content.size());
-            
-
+        n = send(m_sockfd, m_resp_content.c_str(), m_resp_content.size(), 0);
     }
 
     closefd();
-}
-
-// get请求
-bool HttpConn::getRequest() {
-    // GET /login.html?username=admin&password=admin HTTP/1.1   带参数
-    // GET /test/index.css HTTP/1.1                             无参数
-
-    const char *tmp_cut = strchr(m_url.c_str(), '?');
-    if (tmp_cut == nullptr) {   // 表示没有携带参数
-        std::string src_path = m_root + m_url;
-        // 判断是否为图片读取
-        if (strncasecmp(m_accept.c_str(), "image", 5) == 0) {
-            LogInfo("request image");
-            m_isimage = true;
-            // 以二进制文件读取图片
-            m_out_file.open(src_path, std::fstream::in | std::fstream::binary);
-        } else {    // 读取正常文件
-            LogInfo("request file");
-            m_isimage = false;
-            m_out_file.open(src_path, std::fstream::in);
-        }
-
-        // 判断文件是否打开
-        if (!m_out_file.is_open()) {
-            // 表示文件不成在
-            return HttpCode::BAD_REQUEST;
-        }
-
-        return HttpCode::FILE_REQUEST;
-    } else {    // 否则就是携带参数
-        char tmp_arg[1024]={0};
-        strcpy(tmp_arg, tmp_cut+1);
-        
-    }
 }

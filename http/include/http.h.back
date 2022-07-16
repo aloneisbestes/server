@@ -82,8 +82,6 @@ private:
     int m_check_state;  // 主状态机当前状态
     int m_connect_type;     // 连接类型，为1表示keep-alive，否则为 close
 
-    bool m_isimage;     // 是否读取图片
-
     Method m_method;                // 请求方式
     std::string m_url;              // 请求路径
     std::string m_version;          // htpp的版本
@@ -118,6 +116,7 @@ public:
     void writeData(HttpCode code);   // 写数据
 
 private:
+// public:
     /* 私有方法 */
     void init();        // 初始化
 
@@ -152,13 +151,6 @@ private:
     bool addBlockLine();        // 添加 \r\n
 
     HttpCode processData();         // 处理数据
-
-    /* 四种请求方式 */
-    bool getRequest();              // get请求
-
-    bool postRequest();             // post 请求
-
-    bool deleteRequest();           // delete 请求
 };
 
 #endif // __HTTP_H__
