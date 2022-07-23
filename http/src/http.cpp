@@ -536,7 +536,7 @@ void HttpConn::writeData(HttpConn::HttpCode code) {
         n = 0;
         int count_size = 0;
         do {
-            n = send(m_sockfd, tmp_send+count_size, 1024, 0);
+            n = send(m_sockfd, tmp_send+count_size, 4096, 0);
             count_size += n;
         }while (n > 0 && count_size != m_resp_content.size());
             
